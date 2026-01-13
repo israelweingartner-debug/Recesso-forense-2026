@@ -1,78 +1,94 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
   <title>Recesso Forense</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f6f7fb; color: #111; }
-    .card { background: white; padding: 28px 26px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.08); width: min(520px, 92vw); }
-    h1 { margin: 0 0 10px; font-size: 22px; }
-    .big { font-size: 56px; font-weight: 800; line-height: 1; margin: 10px 0 8px; }
-    .sub { color: #444; font-size: 14px; margin: 0; }
-    .meta { margin-top: 16px; font-size: 12px; color: #666; }
-    .pill { display:inline-block; padding: 6px 10px; border-radius: 999px; background:#eef2ff; color:#2b2f77; font-size: 12px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f5f6fa;
+      color: #111;
+    }
+    .card {
+      background: #fff;
+      padding: 32px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    .days {
+      font-size: 64px;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+    .text {
+      font-size: 15px;
+      color: #444;
+    }
+    .meta {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #666;
+    }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Contagem regressiva para o recesso forense</h1>
-    <div class="pill" id="target"></div>
-
-    <div class="big" id="days">—</div>
-    <p class="sub" id="message">Calculando…</p>
-
+  <div class="card">
+    <h1>Recesso Forense</h1>
+    <div class="days" id="days">—</div>
+    <div class="text" id="message">Calculando…</div>
     <div class="meta" id="meta"></div>
-  </main>
+  </div>
 
   <script>
-    // Data-alvo: 20/12/2026 (BRT). Usamos uma data "local" e normalizamos para meia-noite
-    // para evitar variação por horário do dia.
-    const targetDateLocal = new Date(2026, 11, 20); // mês 11 = dezembro
-    const daysEl = document.getElementById("days");
-    const msgEl = document.getElementById("message");
-    const metaEl = document.getElementById("meta");
-    const targetEl = document.getElementById("target");
+    const inicioRecesso = new Date(2026, 11, 20);
 
-    function formatBR(d) {
-      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    function inicioDoDia(data) {
+      const d = new Date(data);
+      d.setHours(0,0,0,0);
+      return d;
     }
 
-    function startOfDay(d) {
-      const x = new Date(d);
-      x.setHours(0,0,0,0);
-      return x;
-    }
+    function atualizar() {
+      const hoje = inicioDoDia(new Date());
+      const alvo = inicioDoDia(inicioRecesso);
+      const msPorDia = 24 * 60 * 60 * 1000;
+      const diff = Math.round((alvo - hoje) / msPorDia);
 
-    function update() {
-      const now = new Date();
-      const today = startOfDay(now);
-      const target = startOfDay(targetDateLocal);
+      const daysEl = document.getElementById("days");
+      const msgEl = document.getElementById("message");
+      const metaEl = document.getElementById("meta");
 
-      const msPerDay = 24 * 60 * 60 * 1000;
-      const diffDays = Math.round((target - today) / msPerDay);
-
-      targetEl.textContent = `Início: ${formatBR(target)} (20/12/2026)`;
-
-      if (diffDays > 0) {
-        daysEl.textContent = diffDays;
-        msgEl.textContent = diffDays === 1 ? "Falta 1 dia." : `Faltam ${diffDays} dias.`;
-      } else if (diffDays === 0) {
+      if (diff > 0) {
+        daysEl.textContent = diff;
+        msgEl.textContent = diff === 1 ? "Falta 1 dia." : `Faltam ${diff} dias.`;
+      } else if (diff === 0) {
         daysEl.textContent = "0";
-        msgEl.textContent = "É hoje! Bom recesso. 😄";
+        msgEl.textContent = "É hoje. Bom recesso!";
       } else {
-        const passed = Math.abs(diffDays);
-        daysEl.textContent = `-${passed}`;
-        msgEl.textContent = passed === 1 ? "O recesso começou ontem." : `O recesso começou há ${passed} dias.`;
+        daysEl.textContent = diff;
+        msgEl.textContent = `O recesso já começou.`;
       }
 
-      metaEl.textContent = `Hoje: ${formatBR(today)} • Hora local: ${now.toLocaleTimeString("pt-BR")} • Fuso: o do seu navegador`;
+      metaEl.textContent =
+        "Início: 20/12/2026 • Hoje: " +
+        hoje.toLocaleDateString("pt-BR");
     }
 
-    update();
-    // Atualiza a cada minuto (não precisa ser mais do que isso)
-    setInterval(update, 60_000);
+    atualizar();
+    setInterval(atualizar, 60000);
   </script>
 </body>
 </html>
